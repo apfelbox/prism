@@ -64,7 +64,7 @@ module.exports = {
 		var compiledTokenStream = Prism.tokenize(testCase.testSource, mainLanguageGrammar);
 		var simplifiedTokenStream = this.transformCompiledTokenStream(compiledTokenStream);
 
-		assert.deepEqual(simplifiedTokenStream, testCase.expectedTokenStream, testCase.comment);
+		assert.deepEqual(testCase.expectedTokenStream, simplifiedTokenStream, testCase.comment);
 	},
 
 
@@ -75,6 +75,7 @@ module.exports = {
 	 * @returns {Array.<string[]>}
 	 */
 	transformCompiledTokenStream: function (tokenStream) {
+		var self = this;
 		return tokenStream.filter(
 			function (token) {
 				// only support objects
@@ -83,7 +84,10 @@ module.exports = {
 		).map(
 			function (entry)
 			{
-				return [entry.type, entry.content];
+				return [
+					entry.type,
+					(typeof entry.content === "object") ? self.transformCompiledTokenStream(entry.content) : entry.content
+				];
 			}
 		);
 	},
